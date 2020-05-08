@@ -15,6 +15,7 @@ type Config struct {
 
 // Client po
 type Client struct {
+	sync.RWMutex
 	trackerPools    map[string]*connPool
 	storagePools    map[string]*connPool
 	storagePoolLock *sync.RWMutex
@@ -57,6 +58,9 @@ func (c *Client) Destory() {
 
 // UploadByFilename filename
 func (c *Client) UploadByFilename(fileName string) (string, error) {
+	c.Lock()
+	defer c.Unlock()
+
 	fileInfo, err := newFileInfo(fileName, nil, "")
 	if err != nil {
 		return "", err
@@ -77,6 +81,9 @@ func (c *Client) UploadByFilename(fileName string) (string, error) {
 
 // UploadByBuffer buffer
 func (c *Client) UploadByBuffer(buffer []byte, fileExtName string) (string, error) {
+	c.Lock()
+	defer c.Unlock()
+
 	fileInfo, err := newFileInfo("", buffer, fileExtName)
 	if err != nil {
 		return "", err
@@ -97,6 +104,9 @@ func (c *Client) UploadByBuffer(buffer []byte, fileExtName string) (string, erro
 
 // DownloadToFile download
 func (c *Client) DownloadToFile(fileID string, localFilename string, offset int64, downloadBytes int64) error {
+	c.Lock()
+	defer c.Unlock()
+
 	groupName, remoteFilename, err := splitFileID(fileID)
 	if err != nil {
 		return err
@@ -116,6 +126,9 @@ func (c *Client) DownloadToFile(fileID string, localFilename string, offset int6
 
 // DownloadToBuffer download
 func (c *Client) DownloadToBuffer(fileID string, offset int64, downloadBytes int64) ([]byte, error) {
+	c.Lock()
+	defer c.Unlock()
+
 	groupName, remoteFilename, err := splitFileID(fileID)
 	if err != nil {
 		return nil, err
@@ -137,6 +150,9 @@ func (c *Client) DownloadToBuffer(fileID string, offset int64, downloadBytes int
 
 // DownloadToAllocatedBuffer download
 func (c *Client) DownloadToAllocatedBuffer(fileID string, buffer []byte, offset int64, downloadBytes int64) error {
+	c.Lock()
+	defer c.Unlock()
+
 	groupName, remoteFilename, err := splitFileID(fileID)
 	if err != nil {
 		return err
@@ -159,6 +175,9 @@ func (c *Client) DownloadToAllocatedBuffer(fileID string, buffer []byte, offset 
 
 // DeleteFile delete
 func (c *Client) DeleteFile(fileID string) error {
+	c.Lock()
+	defer c.Unlock()
+
 	groupName, remoteFilename, err := splitFileID(fileID)
 	if err != nil {
 		return err
